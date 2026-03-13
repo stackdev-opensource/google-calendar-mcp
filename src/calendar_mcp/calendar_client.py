@@ -5,7 +5,7 @@ import logging
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
-from calendar_mcp.security import sanitize_event_content
+from calendar_mcp.security import sanitize_calendar_content, sanitize_event_content
 
 logger = logging.getLogger("calendar-mcp.client")
 
@@ -33,14 +33,7 @@ class CalendarClient:
                 "access_role": cal.get("accessRole", ""),
                 "time_zone": cal.get("timeZone", ""),
             }
-            # Sanitize untrusted fields — shared calendar names are attacker-controlled
-            if entry["summary"]:
-                entry["summary"] = f"<calendar_name>{entry['summary']}</calendar_name>"
-            if entry["description"]:
-                entry["description"] = (
-                    f"<calendar_description>{entry['description']}</calendar_description>"
-                )
-            calendars.append(entry)
+            calendars.append(sanitize_calendar_content(entry))
         return calendars
 
     def get_events(
@@ -191,12 +184,14 @@ class CalendarClient:
         if organizer_str:
             parsed["organizer"] = organizer_str
 
-        # Attendee display names are attacker-controlled — wrap in delimiters
+        # Attendee fields are attacker-controlled — wrap in delimiters
         attendees = event.get("attendees", [])
         if attendees:
             parsed["attendees"] = [
                 {
-                    "email": a.get("email", ""),
+                    "email": (
+                        f"<attendee_email>{a['email']}</attendee_email>" if a.get("email") else ""
+                    ),
                     "response_status": a.get("responseStatus", ""),
                     "display_name": (
                         f"<attendee_name>{a['displayName']}</attendee_name>"

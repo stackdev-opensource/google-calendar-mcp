@@ -2,6 +2,7 @@
 
 import json
 import logging
+from datetime import UTC, datetime
 
 from google.auth.exceptions import GoogleAuthError
 from googleapiclient.errors import HttpError
@@ -86,15 +87,16 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         logger.exception("Calendar API error in %s", name)
         raise ValueError(f"Calendar API error ({e.resp.status}): {e.reason}") from None
     except GoogleAuthError:
-        # Auth error — never leak token details
+        # Auth error — evict cached client so next call re-authenticates
+        _clients.pop(arguments.get("account", ""), None)
         logger.exception("Authentication error in %s", name)
         raise ValueError(
             f"Authentication failed for account '{arguments.get('account', 'unknown')}'. "
             f"Try re-running: python -m calendar_mcp auth --account {arguments.get('account', '')}"
         ) from None
     except ValueError:
-        # Our own validation errors (e.g. attendee rejection) — pass through
-        raise
+        # Our own validation errors (e.g. attendee rejection) — pass through as-is
+        raise  # noqa: TRY201 — intentionally preserves chain for our own errors
     except Exception:
         # Catch-all — log full trace to stderr, return safe message to AI
         logger.exception("Unexpected error in %s", name)
@@ -114,9 +116,11 @@ async def handle_get_events(arguments: dict) -> list[TextContent]:
     client = _get_client(arguments["account"])
     max_results = arguments.get("max_results", 50)
     max_results = max(1, min(100, max_results))
+    # Default time_min to now for deterministic behavior
+    time_min = arguments.get("time_min") or datetime.now(UTC).isoformat()
     events = client.get_events(
         calendar_id=arguments.get("calendar_id", "primary"),
-        time_min=arguments.get("time_min"),
+        time_min=time_min,
         time_max=arguments["time_max"],
         max_results=max_results,
         query=arguments.get("query"),
@@ -163,6 +167,7 @@ async def handle_create_event(arguments: dict) -> list[TextContent]:
         description=arguments.get("description"),
         location=arguments.get("location"),
         timezone=arguments.get("timezone", "UTC"),
+        # Empty list → None so we skip the attendees field entirely
         attendees=validated_attendees or None,
         send_updates=send_updates,
     )

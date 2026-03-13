@@ -138,9 +138,9 @@ ALL_TOOL_DEFINITIONS: dict[str, Tool] = {
     "calendar_create_event": Tool(
         name="calendar_create_event",
         description=(
-            "Create a new calendar event. SECURITY NOTE: This tool cannot "
-            "add external attendees or send notifications. Events are created "
-            "silently on your calendar only."
+            "Create a new calendar event. SECURITY NOTE: Attendees are "
+            "restricted to whitelisted domains only. Notifications are "
+            "controlled server-side, not by the caller."
         ),
         inputSchema={
             "type": "object",

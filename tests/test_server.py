@@ -1,6 +1,7 @@
 """Tests for the MCP server tool dispatch and access control."""
 
 from calendar_mcp.access_control import get_enabled_tools
+from calendar_mcp.server import TOOL_HANDLERS
 from calendar_mcp.tools import ALL_TOOL_DEFINITIONS
 
 
@@ -50,3 +51,7 @@ class TestToolDefinitions:
         """Full preset exposes all 6 tools."""
         enabled = get_enabled_tools(full_config)
         assert len(enabled) == 6
+
+    def test_handlers_match_definitions(self):
+        """Every tool definition has a corresponding handler."""
+        assert set(TOOL_HANDLERS.keys()) == set(ALL_TOOL_DEFINITIONS.keys())

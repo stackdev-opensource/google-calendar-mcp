@@ -1,3 +1,10 @@
+# Credentials — NEVER commit these
+accounts.json
+client_secret*.json
+*.pem
+*.key
+token*.json
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
