@@ -1,0 +1,21 @@
+{
+  "accounts": [
+    {
+      "email": "user@example.com",
+      "type": "work",
+      "description": "Work calendar"
+    }
+  ],
+
+  "tool_access": {
+    "preset": "read-only",
+
+    "overrides": {}
+  },
+
+  "security": {
+    "allow_attendees": false,
+    "allowed_attendee_domains": [],
+    "send_notifications": false
+  }
+}
