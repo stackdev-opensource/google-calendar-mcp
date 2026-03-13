@@ -1,0 +1,57 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+labels: ["bug"]
+
+body:
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Initial Checks
+      options:
+        - label: I confirm that I'm using the latest version of calendar-mcp-secure
+          required: true
+        - label: I searched existing issues before opening this one
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Explain what happened and what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Minimal steps to reproduce the issue.
+      placeholder: |
+        1. Configure accounts.json with ...
+        2. Run `python -m calendar_mcp ...`
+        3. Invoke tool `calendar_get_events` with ...
+        4. See error ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: |
+        Please provide the following details:
+      render: Text
+      placeholder: |
+        - OS: macOS 15.3
+        - Python: 3.12.2
+        - calendar-mcp-secure: 0.1.0
+        - MCP client: Claude Desktop / Claude Code
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Error Output
+      description: Paste any relevant logs or error output. **Redact credentials and calendar content.**
+      render: Text
